@@ -103,6 +103,11 @@ describe('Wallet (e2e)', () => {
 
       expect(res.body.balance).toBe('15000.5000');
       expect(res.body.currency).toBe('NGN');
+      expect(res.body).toHaveProperty('transaction');
+      expect(res.body.transaction.type).toBe('DEPOSIT');
+      expect(res.body.transaction.amount).toBe('15000.5000');
+      expect(res.body.transaction.status).toBe('COMPLETED');
+      expect(res.body.transaction.description).toBe('First deposit');
 
       const checkRes = await request(app.getHttpServer())
         .get('/users/wallet')

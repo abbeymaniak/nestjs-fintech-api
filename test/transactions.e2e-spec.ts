@@ -143,6 +143,16 @@ describe('Transactions History & Filters (e2e)', () => {
       for (const tx of withdrawRes.body.data) {
         expect(tx.type).toBe('WITHDRAWAL');
       }
+
+      const depositRes = await request(app.getHttpServer())
+        .get('/transactions?type=DEPOSIT')
+        .set('Authorization', `Bearer ${userAToken}`)
+        .expect(200);
+
+      expect(depositRes.body.data.length).toBeGreaterThanOrEqual(1);
+      for (const tx of depositRes.body.data) {
+        expect(tx.type).toBe('DEPOSIT');
+      }
     });
 
     it('should filter transactions by status', async () => {
