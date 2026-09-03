@@ -10,6 +10,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { WalletModule } from './wallet/wallet.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { TransfersModule } from './transfers/transfers.module';
 
 @Module({
   imports: [
@@ -35,12 +37,14 @@ import { WalletModule } from './wallet/wallet.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 10,
+        limit: process.env.NODE_ENV === 'test' ? 1000 : 10,
       },
     ]),
     UsersModule,
     AuthModule,
     WalletModule,
+    TransactionsModule,
+    TransfersModule,
   ],
   controllers: [AppController],
   providers: [
