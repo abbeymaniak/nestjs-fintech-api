@@ -37,7 +37,7 @@ export class TransactionsService {
 
     const queryBuilder = this.transactionRepository
       .createQueryBuilder('tx')
-      .where('tx.wallet_id = :walletId', { walletId: wallet.id });
+      .where('tx.walletId = :walletId', { walletId: wallet.id });
 
     if (query.type) {
       queryBuilder.andWhere('tx.type = :type', { type: query.type });
