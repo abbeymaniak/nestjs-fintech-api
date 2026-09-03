@@ -16,7 +16,7 @@ export class CreateTransactionsTable1788450854633 implements MigrationInterface 
     public async down(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`ALTER TABLE "transactions" DROP CONSTRAINT "FK_transactions_sender_id"`);
         await queryRunner.query(`ALTER TABLE "transactions" DROP CONSTRAINT "FK_0b171330be0cb621f8d73b87a9e"`);
-        await queryRunner.query(`ALTER TABLE "wallets" ALTER COLUMN "balance" SET DEFAULT 0.0000`);
+        await queryRunner.query(`ALTER TABLE "wallets" ALTER COLUMN "balance" SET DEFAULT '0.0000'`);
         await queryRunner.query(`DROP INDEX "public"."IDX_b684b843e5f0bf156aacb7d032"`);
         await queryRunner.query(`DROP TABLE "transactions"`);
         await queryRunner.query(`DROP TYPE "public"."transactions_status_enum"`);

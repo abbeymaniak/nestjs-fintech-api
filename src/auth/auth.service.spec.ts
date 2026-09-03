@@ -41,6 +41,7 @@ describe('AuthService (Unit Tests)', () => {
       findByIdWithRefreshToken: jest.fn(),
       create: jest.fn(),
       updateRefreshToken: jest.fn(),
+      revokeAllSessions: jest.fn(),
     };
 
     walletService = {
@@ -223,16 +224,13 @@ describe('AuthService (Unit Tests)', () => {
   });
 
   describe('logout()', () => {
-    it('should revoke session by clearing refresh token hash in database', async () => {
-      usersService.updateRefreshToken!.mockResolvedValue(undefined);
+    it('should revoke session by clearing refresh token and incrementing tokenVersion', async () => {
+      usersService.revokeAllSessions!.mockResolvedValue(undefined);
 
       const result = await authService.logout(mockUser.id);
 
       expect(result).toEqual({ message: 'Logged out successfully' });
-      expect(usersService.updateRefreshToken).toHaveBeenCalledWith(
-        mockUser.id,
-        null,
-      );
+      expect(usersService.revokeAllSessions).toHaveBeenCalledWith(mockUser.id);
     });
   });
 });

@@ -67,6 +67,7 @@ export class AuthService {
       newUser.id,
       newUser.email,
       newUser.role,
+      newUser.tokenVersion ?? 0,
     );
     await this.updateHashedRefreshToken(newUser.id, tokens.refreshToken);
 
@@ -100,7 +101,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.role,
+      user.tokenVersion ?? 0,
+    );
     await this.updateHashedRefreshToken(user.id, tokens.refreshToken);
 
     return {
@@ -148,14 +154,19 @@ export class AuthService {
       throw new UnauthorizedException('Access Denied: Invalid refresh token');
     }
 
-    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.role,
+      user.tokenVersion ?? 0,
+    );
     await this.updateHashedRefreshToken(user.id, tokens.refreshToken);
 
     return tokens;
   }
 
   async logout(userId: string): Promise<{ message: string }> {
-    await this.usersService.updateRefreshToken(userId, null);
+    await this.usersService.revokeAllSessions(userId);
     return { message: 'Logged out successfully' };
   }
 
@@ -163,11 +174,13 @@ export class AuthService {
     userId: string,
     email: string,
     role: UserRole,
+    tokenVersion: number = 0,
   ): Promise<AuthTokens> {
     const payload: JwtPayload = {
       sub: userId,
       email,
       role,
+      tokenVersion,
     };
 
     const accessSecret = this.configService.get<string>('JWT_SECRET');

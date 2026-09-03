@@ -221,5 +221,12 @@ describe('Auth & Users Lifecycle (e2e)', () => {
         .send({ refreshToken })
         .expect(401);
     });
+
+    it('should immediately reject protected requests using the old access token after logout (401)', async () => {
+      await request(app.getHttpServer())
+        .get('/users/profile')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(401);
+    });
   });
 });

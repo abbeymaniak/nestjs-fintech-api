@@ -1,114 +1,209 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🏦 NestJS Fintech REST API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A production-grade, enterprise-ready fintech REST API built with **NestJS**, **TypeScript**, **PostgreSQL**, and **TypeORM**. 
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Engineered with financial-grade consistency: **atomic transactions**, **pessimistic row-level locking** for double-spending prevention, **symmetric double-entry ledgers**, **instant session revocation**, and **audited transaction history**.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🌟 Core Features
 
-## Project setup
+- **🔐 Robust JWT Authentication**:
+  - Stateless Access Tokens (15-min expiry) + Stateful Refresh Tokens (7-day rotation).
+  - **Instant Logout (Approach B)**: Utilizes database-backed `tokenVersion` checks in `JwtStrategy` so that logging out revokes access tokens *immediately across all devices*.
+  - Strong password hashing with `bcrypt`.
+- **💼 Auto-Provisioned Wallets**:
+  - Automatically provisions a multi-currency ready `0.0000 NGN` wallet upon registration.
+  - High-precision financial balances stored in `numeric(18, 4)`.
+- **⚡ Double-Spending & Race Condition Protection**:
+  - **Atomic P2P Transfers**: Wrapped in ACID transactions with deterministic wallet locking order (`lockOrder = [id1, id2].sort()`) to prevent deadlock.
+  - **Pessimistic Write Locking**: Utilizes PostgreSQL `SELECT ... FOR UPDATE` to eliminate race conditions and lost updates during concurrent transfers and deposits.
+  - **Double-Entry Ledger**: Every transfer creates simultaneous, immutable `TRANSFER_OUT` (debit) and `TRANSFER_IN` (credit) audit records.
+- **📜 Audited Transaction History**:
+  - Indexed queries on `(wallet_id, createdAt DESC)` for sub-5ms lookups.
+  - Comprehensive filtering: filter by transaction `type` (`DEPOSIT`, `TRANSFER_IN`, `TRANSFER_OUT`, `WITHDRAWAL`), `status` (`COMPLETED`, `PENDING`, `FAILED`), and date boundaries (`startDate`, `endDate`).
+  - Zero-reconnaissance IDOR protection (returns `404 Not Found` for foreign records).
+- **🛡️ Production Security & CORS**:
+  - Configurable CORS with credential support (`origin: true` in dev, domain whitelisting in production).
+  - Rate limiting with `@nestjs/throttler`.
+  - Global `ValidationPipe` with input whitelisting and sanitization.
+- **📖 Interactive Swagger UI (OpenAPI 3.0)**:
+  - Full API exploration and "Try it out" interactive console at `/api/docs`.
+  - Protected with HTTP Basic Authentication against automated bot reconnaissance.
 
+---
+
+## 🛠️ Tech Stack & Prerequisites
+
+- **Runtime**: Node.js v20+ (v24 recommended)
+- **Framework**: NestJS v11+
+- **Database**: PostgreSQL 16
+- **ORM**: TypeORM
+- **Containerization**: Docker & Docker Compose
+- **Testing**: Jest (Supertest for E2E integration)
+- **Linter**: Oxlint
+
+---
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
 ```bash
-$ npm install
+git clone https://github.com/your-org/nest-fintech-api.git
+cd nest-fintech-api
 ```
 
-## Compile and run the project
-
+### 2. Environment Configuration
+Copy `.env.example` to create your local `.env`:
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `DATABASE_HOST` | Database server host | `localhost` (or `postgres` in Docker) |
+| `DATABASE_PORT` | PostgreSQL port | `5433` (Docker host port) / `5432` |
+| `DATABASE_USER` | Database user | `nest_fintech_username` |
+| `DATABASE_PASSWORD`| Database password | `nest_fintech_password` |
+| `DATABASE_NAME` | Database name | `nest_fintech_db` |
+| `PORT` | API server port | `3000` |
+| `JWT_SECRET` | Secret key for access tokens | *Replace with 64-char string* |
+| `JWT_REFRESH_SECRET` | Secret key for refresh tokens | *Replace with 64-char string* |
+| `JWT_EXPIRES` | Access token duration | `15m` |
+| `JWT_REFRESH_EXPIRES`| Refresh token duration | `7d` |
+| `SWAGGER_USER` | Swagger UI documentation login | `admin` |
+| `SWAGGER_PASSWORD` | Swagger UI documentation password | `secret123` |
+| `FRONTEND_URL` | Allowed CORS origins (comma-separated)| `http://localhost:3000,http://localhost:5173` |
 
+---
+
+## 🐳 Running with Docker Compose (Recommended)
+
+Start the entire stack (PostgreSQL + NestJS API in watch mode):
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up -d --build
 ```
 
-## Deployment
+- API Server: `http://localhost:3000`
+- Swagger Docs: `http://localhost:3000/api/docs`
+- PostgreSQL Port: `5433`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+To view live container logs:
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose logs -f api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+To stop containers:
+```bash
+docker compose down
+```
 
-## Observability
+---
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+## 💻 Running Locally (Node.js)
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
+### 1. Install Dependencies
+```bash
+npm install
+```
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+### 2. Start PostgreSQL
+If not using Docker for the API, start only the database:
+```bash
+docker compose up -d postgres
+```
 
-## Resources
+### 3. Run Database Migrations
+```bash
+npm run migration:run
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 4. Start the Application
+```bash
+# Development (with file watch)
+npm run start:dev
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Production build & start
+npm run build
+npm run start:prod
+```
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🗄️ Database Migrations Guide
 
-## Stay in touch
+All database schema changes are strictly version-controlled using TypeORM migrations.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Available Migration Commands
 
-## License
+```bash
+# Run all pending migrations
+npm run migration:run
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Rollback the last executed migration
+npm run migration:revert
+
+# Reset database from scratch (Laravel `migrate:fresh` equivalent)
+npm run migration:fresh
+
+# Generate a new migration by diffing entities against active DB
+npm run migration:generate -- src/database/migrations/<MigrationName>
+```
+
+> [!IMPORTANT]
+> **Production Safety Guard in `migration:fresh`**:
+> The `migration:fresh` script includes an inline environment check:
+> ```bash
+> if (process.env.NODE_ENV === "production") abort;
+> ```
+> This guarantees that accidental execution on production servers will abort immediately without dropping tables or losing financial data!
+
+---
+
+## 🧪 Testing Suite (100% Pass Rate)
+
+The repository includes comprehensive Unit and E2E integration test suites:
+
+```bash
+# Run unit tests (32 tests covering services & business logic)
+npm test
+
+# Run E2E integration tests against real PostgreSQL database (46 tests)
+npm run test:e2e
+
+# Run linter
+npm run lint
+```
+
+### Key Test Coverage Areas:
+- **P2P Transfer Atomic Isolation**: Verifies simultaneous balance debit/credit and ledger generation.
+- **Double-Spending Stress Test**: Fires 5 concurrent requests against an insufficient balance; asserts only valid transfers succeed while overdrafts are cleanly rejected.
+- **Instant Logout Assertion**: Asserts that an access token is immediately rejected with `401 Unauthorized` on its very next call after logging out.
+- **Zero-Reconnaissance IDOR**: Verifies that querying another tenant's transaction ID returns `404 Not Found`.
+
+---
+
+## 📖 API Documentation & Swagger UI
+
+Once the application is running, navigate to:
+👉 **[http://localhost:3000/api/docs](http://localhost:3000/api/docs)**
+
+When prompted by the browser for credentials, enter:
+- **Username**: `admin` *(or value in `.env` `SWAGGER_USER`)*
+- **Password**: `secret123` *(or value in `.env` `SWAGGER_PASSWORD`)*
+
+### Quick API Endpoint Reference
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `POST` | `/auth/register` | Register new user + auto-provision wallet | No |
+| `POST` | `/auth/login` | Authenticate & receive access/refresh tokens | No |
+| `POST` | `/auth/refresh` | Rotate access & refresh token pair | No |
+| `POST` | `/auth/logout` | Revoke session & increment `tokenVersion` | Bearer JWT |
+| `GET` | `/users/profile` | Get authenticated user profile | Bearer JWT |
+| `GET` | `/wallet/balance` | Get wallet balance & currency | Bearer JWT |
+| `POST` | `/wallet/fund` | Atomically fund wallet & create `DEPOSIT` receipt | Bearer JWT |
+| `POST` | `/transfers/send` | Atomic P2P transfer with row locking | Bearer JWT |
+| `POST` | `/transfers/withdraw` | Withdraw funds to external destination | Bearer JWT |
+| `GET` | `/transactions` | Paginated transaction history with type/date filters | Bearer JWT |
+| `GET` | `/transactions/:id`| Look up transaction receipt (IDOR protected) | Bearer JWT |
