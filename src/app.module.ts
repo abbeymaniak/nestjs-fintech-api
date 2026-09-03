@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TransfersModule } from './transfers/transfers.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     AuthModule,
     WalletModule,
     TransactionsModule,
+    TransfersModule,
   ],
   controllers: [AppController],
   providers: [
