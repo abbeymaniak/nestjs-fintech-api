@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { WalletService } from '../wallet/wallet.service';
 import { UserRole } from '../users/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -34,6 +35,7 @@ export interface AuthResponse {
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly walletService: WalletService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -58,6 +60,8 @@ export class AuthService {
       role: UserRole.USER,
       isActive: true,
     });
+
+    await this.walletService.createWalletForUser(newUser.id, 'NGN');
 
     const tokens = await this.generateTokens(
       newUser.id,
