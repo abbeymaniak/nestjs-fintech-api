@@ -37,7 +37,7 @@ import { TransfersModule } from './transfers/transfers.module';
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
-        limit: 10,
+        limit: process.env.NODE_ENV === 'test' ? 1000 : 10,
       },
     ]),
     UsersModule,
