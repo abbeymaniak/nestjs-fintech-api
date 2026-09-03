@@ -115,29 +115,32 @@ export class TransfersService {
 
       const debitLedger = queryRunner.manager.create(Transaction, {
         walletId: lockedSenderWallet.id,
+        senderId: senderUserId,
         amount: transferAmount.toFixed(4),
         type: TransactionType.TRANSFER_OUT,
         status: TransactionStatus.COMPLETED,
         reference: transferReference,
         description: sendTransferDto.description || `Transfer to ${recipient.email}`,
         metadata: {
-          counterpartyId: recipient.id,
-          counterpartyEmail: recipient.email,
           senderId: senderUserId,
+          receiverId: recipient.id,
+          recipientEmail: recipient.email,
+          description: sendTransferDto.description,
         },
       });
 
       const creditLedger = queryRunner.manager.create(Transaction, {
         walletId: lockedRecipientWallet.id,
+        senderId: senderUserId,
         amount: transferAmount.toFixed(4),
         type: TransactionType.TRANSFER_IN,
         status: TransactionStatus.COMPLETED,
         reference: transferReference,
         description: sendTransferDto.description || `Transfer from sender`,
         metadata: {
-          counterpartyId: senderUserId,
           senderId: senderUserId,
-          recipientId: recipient.id,
+          receiverId: recipient.id,
+          description: sendTransferDto.description,
         },
       });
 
@@ -198,14 +201,17 @@ export class TransfersService {
 
       const withdrawalLedger = queryRunner.manager.create(Transaction, {
         walletId: lockedWallet.id,
+        senderId: userId,
         amount: withdrawAmount.toFixed(4),
         type: TransactionType.WITHDRAWAL,
         status: TransactionStatus.COMPLETED,
         reference: withdrawalReference,
         description: withdrawDto.description || 'Wallet withdrawal',
         metadata: {
-          userId,
+          senderId: userId,
+          receiverId: null,
           destination: withdrawDto.description || 'Bank account',
+          description: withdrawDto.description || 'Wallet withdrawal',
         },
       });
 

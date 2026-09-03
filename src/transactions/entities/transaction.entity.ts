@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Wallet } from '../../wallet/entities/wallet.entity';
+import { User } from '../../users/entities/user.entity';
 
 export enum TransactionType {
   DEPOSIT = 'DEPOSIT',
@@ -34,6 +35,13 @@ export class Transaction {
   @ManyToOne(() => Wallet, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'wallet_id' })
   wallet: Wallet;
+
+  @Column({ name: 'sender_id', type: 'uuid', nullable: true })
+  senderId?: string;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'sender_id' })
+  sender?: User;
 
   @Column({
     type: 'decimal',

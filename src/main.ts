@@ -1,6 +1,7 @@
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import basicAuth from 'express-basic-auth';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -8,7 +9,14 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_URL
+      ? process.env.FRONTEND_URL.split(',').map((url) => url.trim())
+      : true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -40,12 +48,29 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
-    .addTag('Authentication', 'User registration, login, token refresh, and logout')
+    .addTag(
+      'Authentication',
+      'User registration, login, token refresh, and logout',
+    )
     .addTag('Users', 'Profile and account management')
     .addTag('Wallet', 'Balance checking and wallet funding')
     .addTag('Transfers', 'Peer-to-peer transfers and withdrawals')
-    .addTag('Transactions', 'Audited transaction history with date and type filters')
+    .addTag(
+      'Transactions',
+      'Audited transaction history with date and type filters',
+    )
     .build();
+
+  app.use(
+    ['/api/docs', '/api/docs-json'],
+    basicAuth({
+      challenge: true,
+      users: {
+        [process.env.SWAGGER_USER || 'admin']:
+          process.env.SWAGGER_PASSWORD || 'secret123',
+      },
+    }),
+  );
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document, {
@@ -58,7 +83,9 @@ async function bootstrap() {
   await app.listen(port);
 
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`Interactive Swagger UI docs available at: http://localhost:${port}/api/docs`);
+  logger.log(
+    `Interactive Swagger UI docs available at: http://localhost:${port}/api/docs`,
+  );
 }
 
 bootstrap();

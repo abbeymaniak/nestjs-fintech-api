@@ -81,7 +81,7 @@ describe('TransactionsService (Unit Tests)', () => {
 
       expect(mockWalletService.getWalletByUserId).toHaveBeenCalledWith(mockUser.id);
       expect(mockTransactionRepository.createQueryBuilder).toHaveBeenCalledWith('tx');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('tx.wallet_id = :walletId', {
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('tx.walletId = :walletId', {
         walletId: mockWallet.id,
       });
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('tx.createdAt', 'DESC');

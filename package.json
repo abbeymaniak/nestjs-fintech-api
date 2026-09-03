@@ -23,7 +23,8 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/database/data-source.ts",
     "migration:create": "typeorm-ts-node-commonjs migration:create",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/database/data-source.ts",
+    "migration:fresh": "node -e 'if (process.env.NODE_ENV === \"production\") { console.error(\"🚨 ERROR: Cannot run migration:fresh in production! Operation aborted.\"); process.exit(1); }' && typeorm-ts-node-commonjs schema:drop -d src/database/data-source.ts && typeorm-ts-node-commonjs migration:run -d src/database/data-source.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
@@ -40,6 +41,7 @@
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "express-basic-auth": "^1.2.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.23.0",
