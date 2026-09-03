@@ -26,6 +26,9 @@ export class User {
   @Column({ nullable: true, select: false })
   refreshToken: string;
 
+  @Column({ name: 'token_version', type: 'int', default: 0 })
+  tokenVersion: number;
+
   @Column({ nullable: true })
   firstName: string;
 

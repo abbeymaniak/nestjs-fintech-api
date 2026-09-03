@@ -52,4 +52,11 @@ export class UsersService {
       refreshToken: hashedRefreshToken as any,
     });
   }
+
+  async revokeAllSessions(userId: string): Promise<void> {
+    await this.userRepository.increment({ id: userId }, 'tokenVersion', 1);
+    await this.userRepository.update(userId, {
+      refreshToken: null as any,
+    });
+  }
 }
