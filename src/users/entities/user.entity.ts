@@ -39,6 +39,9 @@ export class User {
   })
   role: UserRole;
 
+  @Column({ nullable: true })
+  phoneNumber: string;
+
   @Column({ default: true })
   isActive: boolean;
 
@@ -51,4 +54,3 @@ export class User {
   @DeleteDateColumn({ nullable: true })
   deletedAt?: Date;
 }
-
