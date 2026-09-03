@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { NotFoundException } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { Wallet } from './entities/wallet.entity';
 
@@ -90,12 +89,18 @@ describe('WalletService (Unit Tests)', () => {
       });
     });
 
-    it('should throw NotFoundException if wallet is not found', async () => {
+    it('should lazily auto-provision wallet if it does not exist (self-healing)', async () => {
       mockWalletRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        walletService.getWalletByUserId('non-existent-user-id'),
-      ).rejects.toThrow(NotFoundException);
+      const result = await walletService.getWalletByUserId(mockWallet.userId);
+
+      expect(mockWalletRepository.create).toHaveBeenCalledWith({
+        userId: mockWallet.userId,
+        balance: '0.0000',
+        currency: 'NGN',
+      });
+      expect(result.currency).toBe('NGN');
+      expect(result.balance).toBe('0.0000');
     });
   });
 
@@ -117,14 +122,15 @@ describe('WalletService (Unit Tests)', () => {
       expect(mockWalletRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException if wallet does not exist when funding', async () => {
+    it('should auto-provision and fund wallet if it does not exist when funding', async () => {
       mockWalletRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        walletService.fundWallet('non-existent-user-id', {
-          amount: 2500.5,
-        }),
-      ).rejects.toThrow(NotFoundException);
+      const result = await walletService.fundWallet(mockWallet.userId, {
+        amount: 2500.5,
+      });
+
+      expect(result.balance).toBe('2500.5000');
+      expect(mockWalletRepository.save).toHaveBeenCalled();
     });
   });
 });
