@@ -9,6 +9,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     ]),
     UsersModule,
     AuthModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [

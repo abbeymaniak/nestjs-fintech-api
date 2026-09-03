@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { WalletService } from '../wallet/wallet.service';
 import { UserRole } from '../users/entities/user.entity';
 
 jest.mock('bcrypt', () => ({
@@ -15,6 +16,7 @@ jest.mock('bcrypt', () => ({
 describe('AuthService (Unit Tests)', () => {
   let authService: AuthService;
   let usersService: jest.Mocked<Partial<UsersService>>;
+  let walletService: jest.Mocked<Partial<WalletService>>;
   let jwtService: jest.Mocked<Partial<JwtService>>;
   let configService: jest.Mocked<Partial<ConfigService>>;
 
@@ -41,6 +43,15 @@ describe('AuthService (Unit Tests)', () => {
       updateRefreshToken: jest.fn(),
     };
 
+    walletService = {
+      createWalletForUser: jest.fn().mockResolvedValue({
+        id: 'mock-wallet-id',
+        userId: mockUser.id,
+        balance: '0.0000',
+        currency: 'NGN',
+      } as any),
+    };
+
     jwtService = {
       signAsync: jest.fn().mockResolvedValue('mocked-jwt-token'),
       verifyAsync: jest.fn(),
@@ -62,6 +73,7 @@ describe('AuthService (Unit Tests)', () => {
       providers: [
         AuthService,
         { provide: UsersService, useValue: usersService },
+        { provide: WalletService, useValue: walletService },
         { provide: JwtService, useValue: jwtService },
         { provide: ConfigService, useValue: configService },
       ],
