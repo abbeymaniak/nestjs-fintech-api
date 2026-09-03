@@ -1,0 +1,38 @@
+
+services:
+  api:
+    build: .
+    ports:
+      - '3000:3000'
+
+    env_file:
+      - .env
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: nest_fintech_username
+      POSTGRES_PASSWORD: nest_fintech_password
+      POSTGRES_DB: nest_fintech_db
+
+    ports:
+      - '5433:5432'
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U nest_fintech_username']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
