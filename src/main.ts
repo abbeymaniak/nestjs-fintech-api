@@ -4,39 +4,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
-/**
- * Bootstrap Application Entry Point
- *
- * WHY DESIGN DECISIONS WERE MADE (Interview Talking Points):
- *
- * 1. Global ValidationPipe (Mass Assignment Protection):
- *    - `whitelist: true`: Automatically strips away any properties that do NOT
- *      have decorators in the target DTO. If an attacker submits `{ email, password, role: 'admin' }`,
- *      the unauthorized `role` property is stripped before reaching controller code.
- *    - `forbidNonWhitelisted: true`: Rather than silently discarding unexpected fields,
- *      it immediately throws a 400 Bad Request error.
- *    - `transform: true`: Automatically converts request payloads into typed instances of their DTO classes.
- *
- * 2. Global HttpExceptionFilter:
- *    - Catches all HTTP exceptions thrown throughout the application, formatting them
- *      into our standard JSON response contract.
- *
- * 3. CORS Configuration:
- *    - Enables Cross-Origin Resource Sharing so frontend applications (React, Next.js, mobile web)
- *      can communicate with this API securely.
- *
- * 4. Swagger / OpenAPI 3.0 Documentation:
- *    - Mounted at `/api/docs`.
- *    - Configures Bearer Authentication (`JWT-auth`) for interactive endpoint testing.
- */
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
-  // 1. Enable CORS for frontend integration
   app.enableCors();
 
-  // 2. Global Input Validation and Sanitization Pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -48,10 +21,8 @@ async function bootstrap() {
     }),
   );
 
-  // 3. Global Exception Filter for Uniform Error Envelopes
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // 4. Swagger (OpenAPI 3.0) Specification Setup
   const swaggerConfig = new DocumentBuilder()
     .setTitle('NestJS Fintech API')
     .setDescription(

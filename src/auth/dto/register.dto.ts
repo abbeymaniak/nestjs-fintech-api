@@ -8,27 +8,6 @@ import {
   MinLength,
 } from 'class-validator';
 
-/**
- * RegisterDto
- *
- * WHAT IT DOES:
- * Defines and validates the payload structure required for user registration.
- *
- * WHY DESIGN DECISIONS WERE MADE (Interview Talking Points):
- * 1. Strong Typing & Validation (class-validator):
- *    NestJS DTOs (Data Transfer Objects) combined with the global `ValidationPipe`
- *    enforce that requests are validated *before* reaching controller logic.
- *    Any invalid payload is rejected with a 400 Bad Request error.
- *
- * 2. Password Complexity Enforcement:
- *    Fintech applications handle monetary assets, so passwords require at least
- *    8 characters containing uppercase, lowercase, and a digit/special character.
- *
- * 3. Swagger Integration (@ApiProperty):
- *    Every property is decorated with Swagger metadata so our interactive OpenAPI
- *    documentation at `/api/docs` automatically renders sample payloads, types,
- *    and required/optional constraints for frontend developers.
- */
 export class RegisterDto {
   @ApiProperty({
     example: 'alex.morgan@fintech.com',
